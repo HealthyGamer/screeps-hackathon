@@ -22,7 +22,7 @@ module.exports = {
 	        })
 	        targetOptions.set('build', {
 	            find: FIND_MY_CONSTRUCTION_SITES,
-                filter: (structure) => {}
+                filter: null
 	        })
 	        targetOptions.set('upgrade', { 
 	            find: FIND_MY_STRUCTURES,
@@ -32,7 +32,7 @@ module.exports = {
 	        })
 	        
 	        for (const [action, option] of targetOptions) {
-	            let targets = creep.room.find(option.find, { filter: option.filter })
+	            let targets = creep.room.find(option.find, option.filter ? { filter: option.filter } : null)
 	            if (targets.length) { // Pick this target!
 	                creep.memory.targetId = targets[0].id
 	                creep.memory.action = action
