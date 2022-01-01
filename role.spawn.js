@@ -13,17 +13,9 @@ module.exports = {
         }
 
         const creepsOptions = new Map() // Use Map to ensure creeps get spawned in the correct order
-        creepsOptions.set('harvester', {
-            max: 3, 
-            parts: [WORK, CARRY, MOVE], 
-        })
-        creepsOptions.set('upgrader', {
-            max: 2, 
-            parts: [WORK, CARRY, MOVE], 
-        })
-        creepsOptions.set('builder', {
-            max: 2, 
-            parts: [WORK, CARRY, MOVE], 
+        creepsOptions.set('worker', {
+            max: 10, 
+            parts: [WORK, WORK, CARRY, MOVE], 
         })
         
         for (const [role, options] of creepsOptions) {
