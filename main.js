@@ -1,10 +1,28 @@
-let roleHarvester = require('role.harvester')
-let roleUpgrader = require('role.upgrader')
-let roleBuilder = require('role.builder')
-let roleTower = require('role.tower')
 let roleSpawn = require('role.spawn')
+let roleTower = require('role.tower')
+let roleWorker = require('role.worker')
+let util = require('util')
+
+
+// TODOs:
+// Add construction sites and build buildings
+
 
 module.exports.loop = function () {
+    // This should only ever run once per "active" room
+    for (const name in Game.rooms) {
+        const room = Game.rooms[name]
+        if (!room.memory.sources) {
+            const sources = room.find(FIND_SOURCES)
+            let results = []
+            for (const source of sources) {
+                results.push({ id: source.id, freeTiles: util.getFreeTiles(source.pos) })
+            }
+            room.memory.sources = results
+            console.log('Wrote ' + sources.length + ' sources into memory')
+        }
+    }
+    
     // Cleanup memory
     for (let name in Memory.creeps) {
         if (!Game.creeps[name]) {
@@ -13,6 +31,7 @@ module.exports.loop = function () {
         }
     }
 
+    // Run through all structures
     for (let name in Game.structures) {
         let structure = Game.structures[name]
         if (structure instanceof StructureTower) {
@@ -21,23 +40,13 @@ module.exports.loop = function () {
         if (structure instanceof StructureSpawn) {
             roleSpawn.run(structure)
         }
-        
     }
-    
-    // TODOs:
-    // Add construction sites and build buildings
-    // Teach creeps to move to the closest Energy source, that actually has available space around it!
 
+    // Run through all creeps
     for (let name in Game.creeps) {
         let creep = Game.creeps[name];
-        if (creep.memory.role == 'harvester') {
-            roleHarvester.run(creep);
-        }
-        if (creep.memory.role == 'upgrader') {
-            roleUpgrader.run(creep);
-        }
-        if (creep.memory.role == 'builder') {
-            roleBuilder.run(creep);
+        if (creep.memory.role == 'worker') {
+            roleWorker.run(creep)
         }
     }
 }
