@@ -1,8 +1,10 @@
+let roleHarvester = require('role.harvester')
+let roleUpgrader = require('role.upgrader')
+let roleBuilder = require('role.builder')
 let roleSpawn = require('role.spawn')
 let roleTower = require('role.tower')
 let roleWorker = require('role.worker')
 let util = require('util')
-
 
 // TODOs:
 // Add construction sites and build buildings
@@ -47,6 +49,17 @@ module.exports.loop = function () {
         let creep = Game.creeps[name];
         if (creep.memory.role == 'worker') {
             roleWorker.run(creep)
+        }
+
+        // Legacy code ;)
+        if (creep.memory.role == 'harvester') {
+            roleHarvester.run(creep);
+        }
+        if (creep.memory.role == 'upgrader') {
+            roleUpgrader.run(creep);
+        }
+        if (creep.memory.role == 'builder') {
+            roleBuilder.run(creep);
         }
     }
 }
