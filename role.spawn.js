@@ -11,11 +11,18 @@ module.exports = {
             
             return
         }
+        
+        // Only run spawn script every X ticks
+        if (!Memory.spawnTimer || Game.time > Memory.spawnTimer) {
+            Memory.spawnTimer = Game.time + 100
+            return
+        }
 
         const creepsOptions = new Map() // Use Map to ensure creeps get spawned in the correct order
+        const creepsMultiplier = Math.floor(spawn.room.energyCapacityAvailable / 200) // Allow bigger creeps if enough energy is available
         creepsOptions.set('worker', {
             max: 10, 
-            parts: [WORK, WORK, CARRY, MOVE], 
+            parts: new Array(creepsMultiplier).fill([WORK, CARRY, MOVE]).flat(),
         })
         
         for (const [role, options] of creepsOptions) {
