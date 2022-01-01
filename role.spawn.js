@@ -22,7 +22,7 @@ module.exports = {
         const creepsMultiplier = Math.floor(spawn.room.energyCapacityAvailable / 200) // Allow bigger creeps if enough energy is available
         creepsOptions.set('worker', {
             max: 10, 
-            parts: new Array(creepsMultiplier).fill([WORK, CARRY, MOVE]).flat(),
+            parts: _.flatten(new Array(creepsMultiplier).fill([WORK, CARRY, MOVE])),
         })
         
         for (const [role, options] of creepsOptions) {
