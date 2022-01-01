@@ -11,61 +11,65 @@ module.exports = {
 	        
 	        // Decide on action: 1. filling spawn/extensions, 2. building, 3. upgrading controller
 	        const targetOptions = new Map()
-	        targetOptions.set({ 
-	            action: 'transfer',
-	            find: FIND_STRUCTURES,
+	        targetOptions.set('transfer', { 
+	            find: FIND_MY_STRUCTURES,
                 filter: (structure) => {
                     return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN || structure.structureType == STRUCTURE_TOWER)
                         && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
                 }
 	        })
-	        targetOptions.set({ 
-	            action: 'build',
+	        targetOptions.set('build', {
 	            find: FIND_MY_CONSTRUCTION_SITES,
                 filter: (structure) => {}
 	        })
-	        targetOptions.set({ 
-	            action: 'upgrade',
-	            find: FIND_STRUCTURES,
+	        targetOptions.set('upgrade', { 
+	            find: FIND_MY_STRUCTURES,
                 filter: (structure) => {
                     return structure.structureType == STRUCTURE_CONTROLLER
                 }
 	        })
 	        
-	        let chosenTarget = null
-	        while (!chosenTarget) {
-	            const option = Array.of(targetOptions)
-	            let targets = creep.room.find(option.find, option.filter)
+	        for (const [action, option] of targetOptions) {
+	            let targets = creep.room.find(option.find, { filter: option.filter })
 	            if (targets.length) { // Pick this target!
-	                chosenTarget = option
 	                creep.memory.targetId = targets[0].id
-	                creep.memory.action = option.action
-	                creep.say(option.action)
+	                creep.memory.action = action
+	                creep.say(action)
+	                
+	                break
 	            }
 	        }
 	    }
 
 	    if (!creep.memory.harvesting) {
             let target = Game.getObjectById(creep.memory.targetId)
-            switch (creep.memory.action) {
-                case 'transfer':
-                    if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}})
-                    }
+            let resultCode = -999
+
+            if (target) {
+                switch (creep.memory.action) {
+                    case 'transfer':
+                        resultCode = creep.transfer(target, RESOURCE_ENERGY)
+                        break
+                    case 'build':
+                        resultCode = creep.build(target)
+                        break
+                    case 'upgrade':
+                        resultCode = creep.upgradeController(target)
+                        break
+                }
+            }
+            
+            switch (resultCode) {
+                case OK:
+                    break // Everything good!
+                case ERR_NOT_IN_RANGE:
+                    creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}})
                     break
-                case 'build':
-                    if (creep.build(target) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
-                    }
-                    break
-                case 'upgrade':
-                    if (creep.upgradeController(target) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
-                    }
-                    break
+                default: // Something went wrong, go back to harvesting
+                    creep.memory.harvesting = true
             }
 	    } else {
-	        let sources = creep.room.find(FIND_SOURCES);
+	        let sources = creep.room.find(FIND_SOURCES_ACTIVE)
             if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(sources[0], {visualizePathStyle: {stroke: '#ffaa00'}});
             }
